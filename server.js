@@ -16,25 +16,45 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// MongoDB Connection with improved options
-mongoose.connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-    socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-    family: 4 // Use IPv4, skip trying IPv6
-})
-.then(() => console.log('MongoDB Connected'))
-.catch(err => {
+// MongoDB Connection with more robust options
+const connectWithRetry = () => {
+  console.log('Attempting to connect to MongoDB...');
+  mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
+    retryWrites: true,
+    w: 'majority',
+    maxPoolSize: 10,
+    minPoolSize: 5
+  })
+  .then(() => {
+    console.log('MongoDB Connected Successfully');
+  })
+  .catch(err => {
     console.error('MongoDB Connection Error:', err);
-    process.exit(1); // Exit if cannot connect to database
-});
+    console.log('Retrying connection in 5 seconds...');
+    setTimeout(connectWithRetry, 5000);
+  });
+};
 
-// Handle MongoDB connection errors
+// Initial connection attempt
+connectWithRetry();
+
+// Handle MongoDB connection events
 mongoose.connection.on('error', err => {
-    console.error('MongoDB connection error:', err);
+  console.error('MongoDB connection error:', err);
 });
 
 mongoose.connection.on('disconnected', () => {
-    console.log('MongoDB disconnected');
+  console.log('MongoDB disconnected, attempting to reconnect...');
+  setTimeout(connectWithRetry, 5000);
+});
+
+mongoose.connection.on('connected', () => {
+  console.log('Mongoose connected to MongoDB');
 });
 
 // Routes
