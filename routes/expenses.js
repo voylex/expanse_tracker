@@ -97,15 +97,6 @@ router.get('/', async (req, res) => {
                 
                 // Calculate net calories: total calories from expenses - (total calories burned from activities + 1900 base calories)
                 dayExpenses.netCalories = dayExpenses.totalCalories - (dayActivities.totalCaloriesBurned + 1900);
-
-                // Add weight data for this date if it exists
-                const weightForDate = weights.find(w => getDateString(w.date) === dateStr);
-                if (weightForDate) {
-                    dayExpenses.weight = {
-                        lb: weightForDate.lb,
-                        kg: weightForDate.kg
-                    };
-                }
             });
 
             weeklyData.push({
@@ -119,7 +110,27 @@ router.get('/', async (req, res) => {
         // Sort weeks by date (most recent first)
         weeklyData.sort((a, b) => b.weekStart - a.weekStart);
 
-        res.render('index', { weeklyData, weights });
+        // Add net calories to weight records
+        const weightsWithNetCalories = weights.map(weight => {
+            const weightDateStr = getDateString(weight.date);
+            const previousDayStr = getPreviousDayString(weight.date);
+            let previousDayNetCalories = 0;
+
+            // Find the previous day's net calories from weeklyData
+            for (const week of weeklyData) {
+                if (week.dailyExpenses[previousDayStr]) {
+                    previousDayNetCalories = week.dailyExpenses[previousDayStr].netCalories;
+                    break;
+                }
+            }
+
+            return {
+                ...weight.toObject(),
+                previousDayNetCalories
+            };
+        });
+
+        res.render('index', { weeklyData, weights: weightsWithNetCalories });
         
     } catch (error) {
         console.error('Error:', error);
