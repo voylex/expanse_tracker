@@ -130,7 +130,7 @@
                             <tbody>
                                 <% weights.forEach(weight => { %>
                                     <tr>
-                                        <td><%= new Date(weight.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                                        <td><%= weight.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
                                         <td><%= weight.lb.toFixed(1) %></td>
                                         <td><%= weight.kg.toFixed(1) %></td>
                                         <td class="<%= weight.previousDayNetCalories >= 0 ? 'text-danger' : 'text-success' %>">

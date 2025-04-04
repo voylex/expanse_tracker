@@ -24,10 +24,14 @@ router.post('/add', async (req, res) => {
             return res.status(400).send('Invalid weight value');
         }
 
+        // Create a date object for today at midnight in the local timezone
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         // Create weight record with lb only, kg will be calculated by pre-save middleware
         const weight = new Weight({
             lb: parseFloat(lb),
-            date: new Date()
+            date: today
         });
 
         console.log('Creating weight record:', weight);
