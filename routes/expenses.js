@@ -116,15 +116,20 @@ router.get('/', async (req, res) => {
 
         // Add net calories to weight records and ensure correct date handling
         const weightsWithNetCalories = weights.map(weight => {
-            // Create a new date object and set to midnight in local timezone
+            // Create a new date object from the weight date
             const weightDate = new Date(weight.date);
             
-            // Adjust for timezone offset to ensure consistent date across environments
-            const userTimezoneOffset = weightDate.getTimezoneOffset() * 60000;
-            const adjustedDate = new Date(weightDate.getTime() + userTimezoneOffset);
+            // Format the date as YYYY-MM-DD to ensure consistent date handling
+            const year = weightDate.getFullYear();
+            const month = String(weightDate.getMonth() + 1).padStart(2, '0');
+            const day = String(weightDate.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
             
-            const weightDateStr = getDateString(adjustedDate);
-            const previousDayStr = getPreviousDayString(adjustedDate);
+            // Create a new date object from the formatted date string
+            const normalizedDate = new Date(formattedDate + 'T00:00:00.000Z');
+            
+            const weightDateStr = getDateString(normalizedDate);
+            const previousDayStr = getPreviousDayString(normalizedDate);
             let previousDayNetCalories = 0;
 
             // Find the previous day's net calories from weeklyData
@@ -137,7 +142,7 @@ router.get('/', async (req, res) => {
 
             return {
                 ...weight.toObject(),
-                date: adjustedDate, // Use the adjusted date
+                date: normalizedDate, // Use the normalized date
                 previousDayNetCalories
             };
         });
