@@ -19,6 +19,7 @@ router.get('/', async (req, res) => {
         // Helper function to get week start date
         const getWeekStart = (date) => {
             const d = new Date(date);
+            // Set to midnight in local timezone
             d.setHours(0, 0, 0, 0);
             d.setDate(d.getDate() - d.getDay());
             return d;
@@ -27,6 +28,7 @@ router.get('/', async (req, res) => {
         // Helper function to get date string in local timezone
         const getDateString = (date) => {
             const d = new Date(date);
+            // Set to midnight in local timezone
             d.setHours(0, 0, 0, 0);
             return d.toISOString().split('T')[0];
         };
@@ -34,6 +36,8 @@ router.get('/', async (req, res) => {
         // Helper function to get previous day's date string
         const getPreviousDayString = (date) => {
             const d = new Date(date);
+            // Set to midnight in local timezone
+            d.setHours(0, 0, 0, 0);
             d.setDate(d.getDate() - 1);
             return getDateString(d);
         };
@@ -112,15 +116,12 @@ router.get('/', async (req, res) => {
 
         // Add net calories to weight records and ensure correct date handling
         const weightsWithNetCalories = weights.map(weight => {
-            // Create a new date object and adjust for timezone
+            // Create a new date object and set to midnight in local timezone
             const weightDate = new Date(weight.date);
+            weightDate.setHours(0, 0, 0, 0);
             
-            // Adjust the date to account for timezone offset
-            const userTimezoneOffset = weightDate.getTimezoneOffset() * 60000;
-            const adjustedDate = new Date(weightDate.getTime() + userTimezoneOffset);
-            
-            const weightDateStr = getDateString(adjustedDate);
-            const previousDayStr = getPreviousDayString(adjustedDate);
+            const weightDateStr = getDateString(weightDate);
+            const previousDayStr = getPreviousDayString(weightDate);
             let previousDayNetCalories = 0;
 
             // Find the previous day's net calories from weeklyData
@@ -133,7 +134,7 @@ router.get('/', async (req, res) => {
 
             return {
                 ...weight.toObject(),
-                date: adjustedDate, // Use the adjusted date
+                date: weightDate, // Use the normalized date
                 previousDayNetCalories
             };
         });
