@@ -1,7 +1,7 @@
 {
   "name": "expense-tracker",
   "version": "1.0.0",
-  "description": "",
+  "description": "expanse_tracker_sample_project",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -20,5 +20,13 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voylex/expanse_tracker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/voylex/expanse_tracker/issues"
+  },
+  "homepage": "https://github.com/voylex/expanse_tracker#readme"
 }
