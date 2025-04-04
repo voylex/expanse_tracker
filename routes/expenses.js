@@ -110,10 +110,17 @@ router.get('/', async (req, res) => {
         // Sort weeks by date (most recent first)
         weeklyData.sort((a, b) => b.weekStart - a.weekStart);
 
-        // Add net calories to weight records
+        // Add net calories to weight records and ensure correct date handling
         const weightsWithNetCalories = weights.map(weight => {
-            const weightDateStr = getDateString(weight.date);
-            const previousDayStr = getPreviousDayString(weight.date);
+            // Create a new date object and adjust for timezone
+            const weightDate = new Date(weight.date);
+            
+            // Adjust the date to account for timezone offset
+            const userTimezoneOffset = weightDate.getTimezoneOffset() * 60000;
+            const adjustedDate = new Date(weightDate.getTime() + userTimezoneOffset);
+            
+            const weightDateStr = getDateString(adjustedDate);
+            const previousDayStr = getPreviousDayString(adjustedDate);
             let previousDayNetCalories = 0;
 
             // Find the previous day's net calories from weeklyData
@@ -126,6 +133,7 @@ router.get('/', async (req, res) => {
 
             return {
                 ...weight.toObject(),
+                date: adjustedDate, // Use the adjusted date
                 previousDayNetCalories
             };
         });
