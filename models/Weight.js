@@ -11,7 +11,12 @@ const weightSchema = new mongoose.Schema({
     },
     date: {
         type: Date,
-        default: Date.now
+        default: function() {
+            // Create a date object for today at midnight in the local timezone
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return today;
+        }
     }
 });
 
