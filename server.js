@@ -17,16 +17,17 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/expense-tracker', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('MongoDB Connected'))
-.catch(err => console.log('MongoDB Connection Error:', err));
+.catch(err => console.error('MongoDB Connection Error:', err));
 
 // Routes
 const expenseRoutes = require('./routes/expenses');
+const activityRoutes = require('./routes/activities');
+const weightRoutes = require('./routes/weights');
 app.use('/', expenseRoutes);
+app.use('/activities', activityRoutes);
+app.use('/weights', weightRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
