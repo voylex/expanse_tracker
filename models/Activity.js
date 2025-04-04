@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
 
-const expenseSchema = new mongoose.Schema({
+const activitySchema = new mongoose.Schema({
     description: {
         type: String,
         required: true
     },
-    amount: {
+    caloriesBurned: {
         type: Number,
         required: true
     },
-    calories: {
-        type: Number,
-        default: 0
+    totalTime: {
+        type: Number, // in minutes
+        required: true
     },
     date: {
         type: Date,
@@ -19,4 +19,4 @@ const expenseSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Expense', expenseSchema); 
+module.exports = mongoose.model('Activity', activitySchema); 
