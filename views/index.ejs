@@ -128,13 +128,30 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% weights.forEach(weight => { %>
+                                <% weights.forEach(weight => { 
+                                    // Format the weight date for display
+                                    const weightDate = new Date(weight.date);
+                                    const formattedDate = weightDate.toLocaleDateString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'short', 
+                                        day: 'numeric',
+                                        timeZone: 'America/Los_Angeles'
+                                    });
+                                    
+                                    // Calculate the previous day's date string for net calories lookup
+                                    const previousDay = new Date(weightDate);
+                                    previousDay.setDate(previousDay.getDate() - 1);
+                                    const previousDayStr = previousDay.toISOString().split('T')[0];
+                                    
+                                    // Get the previous day's net calories from the map
+                                    const previousDayNetCalories = netCaloriesMap[previousDayStr] || 0;
+                                %>
                                     <tr>
-                                        <td><%= weight.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                                        <td><%= formattedDate %></td>
                                         <td><%= weight.lb.toFixed(1) %></td>
                                         <td><%= weight.kg.toFixed(1) %></td>
-                                        <td class="<%= weight.previousDayNetCalories >= 0 ? 'text-danger' : 'text-success' %>">
-                                            <%= weight.previousDayNetCalories %> cal
+                                        <td class="<%= previousDayNetCalories >= 0 ? 'text-danger' : 'text-success' %>">
+                                            <%= previousDayNetCalories %> cal
                                         </td>
                                         <td>
                                             <button class="btn btn-danger btn-sm delete-weight" data-id="<%= weight._id %>">
@@ -168,7 +185,7 @@
                 <div class="day-header">
                     <div class="row align-items-center">
                         <div class="col-md-4">
-                            <h5 class="mb-0"><%= new Date(date + 'T00:00:00').toLocaleDateString() %></h5>
+                            <h5 class="mb-0"><%= new Date(date + 'T00:00:00-08:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' }) %></h5>
                         </div>
                         <div class="col-md-8">
                             <div class="d-flex justify-content-between align-items-center calories-info">

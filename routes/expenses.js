@@ -25,21 +25,36 @@ router.get('/', async (req, res) => {
             return d;
         };
 
-        // Helper function to get date string in local timezone
+        // Helper function to get date string in PST timezone
         const getDateString = (date) => {
             const d = new Date(date);
-            // Set to midnight in local timezone
-            d.setHours(0, 0, 0, 0);
-            return d.toISOString().split('T')[0];
+            // Convert to PST (UTC-8)
+            const pstDate = new Date(d.getTime() - (8 * 60 * 60 * 1000));
+            // Set to midnight in PST
+            pstDate.setUTCHours(0, 0, 0, 0);
+            return pstDate.toISOString().split('T')[0];
         };
 
-        // Helper function to get previous day's date string
+        // Helper function to get previous day's date string in PST
         const getPreviousDayString = (date) => {
             const d = new Date(date);
-            // Set to midnight in local timezone
-            d.setHours(0, 0, 0, 0);
-            d.setDate(d.getDate() - 1);
-            return getDateString(d);
+            // Convert to PST (UTC-8)
+            const pstDate = new Date(d.getTime() - (8 * 60 * 60 * 1000));
+            // Set to midnight in PST
+            pstDate.setUTCHours(0, 0, 0, 0);
+            // Subtract one day
+            pstDate.setUTCDate(pstDate.getUTCDate() - 1);
+            return pstDate.toISOString().split('T')[0];
+        };
+
+        // Helper function to normalize date to PST midnight
+        const normalizeToPSTMidnight = (date) => {
+            const d = new Date(date);
+            // Convert to PST (UTC-8)
+            const pstDate = new Date(d.getTime() - (8 * 60 * 60 * 1000));
+            // Set to midnight in PST
+            pstDate.setUTCHours(0, 0, 0, 0);
+            return pstDate;
         };
 
         // Group expenses by week
@@ -114,38 +129,22 @@ router.get('/', async (req, res) => {
         // Sort weeks by date (most recent first)
         weeklyData.sort((a, b) => b.weekStart - a.weekStart);
 
-        // Add net calories to weight records and ensure correct date handling
-        const weightsWithNetCalories = weights.map(weight => {
-            // Create a new date object from the weight date
-            const weightDate = new Date(weight.date);
-            
-            // Set the time to midnight in the local timezone
-            weightDate.setHours(0, 0, 0, 0);
-            
-            // Adjust for timezone offset to ensure consistent date across environments
-            const userTimezoneOffset = weightDate.getTimezoneOffset() * 60000;
-            const adjustedDate = new Date(weightDate.getTime() + userTimezoneOffset);
-            
-            const weightDateStr = getDateString(adjustedDate);
-            const previousDayStr = getPreviousDayString(adjustedDate);
-            let previousDayNetCalories = 0;
+        // Sort weights by date (most recent first)
+        weights.sort((a, b) => b.date - a.date);
 
-            // Find the previous day's net calories from weeklyData
-            for (const week of weeklyData) {
-                if (week.dailyExpenses[previousDayStr]) {
-                    previousDayNetCalories = week.dailyExpenses[previousDayStr].netCalories;
-                    break;
-                }
-            }
-
-            return {
-                ...weight.toObject(),
-                date: adjustedDate, // Use the adjusted date
-                previousDayNetCalories
-            };
+        // Create a map of date strings to net calories for quick lookup
+        const netCaloriesMap = {};
+        weeklyData.forEach(week => {
+            Object.entries(week.dailyExpenses).forEach(([date, dayData]) => {
+                netCaloriesMap[date] = dayData.netCalories;
+            });
         });
 
-        res.render('index', { weeklyData, weights: weightsWithNetCalories });
+        res.render('index', { 
+            weeklyData, 
+            weights,
+            netCaloriesMap
+        });
         
     } catch (error) {
         console.error('Error:', error);
