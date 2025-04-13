@@ -1,7 +1,7 @@
 {
   "name": "expense-tracker",
   "version": "1.0.0",
-  "description": "expanse_tracker_sample_project",
+  "description": "A simple expense tracking application",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -12,14 +12,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "ejs": "^3.1.10",
-    "express": "^4.21.2",
-    "mongoose": "^8.13.0"
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.9",
+    "express": "^4.18.3",
+    "mongodb": "^6.5.0",
+    "mongoose": "^8.2.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.0"
   },
   "repository": {
     "type": "git",
@@ -28,5 +30,8 @@
   "bugs": {
     "url": "https://github.com/voylex/expanse_tracker/issues"
   },
-  "homepage": "https://github.com/voylex/expanse_tracker#readme"
+  "homepage": "https://github.com/voylex/expanse_tracker#readme",
+  "engines": {
+    "node": "23.x"
+  }
 }
